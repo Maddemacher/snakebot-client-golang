@@ -72,6 +72,14 @@ const mode string = "training"
 s := snake.NewSnake("emil", "black", c)
 ```
 
+### Tests
+
+To run the test suite traverse into the tests folder in the repo and run: go tests
+
+This should run the test suite
+
 ### Todo
 
 1. Fix panic handling
+2. utils
+3. more tests
