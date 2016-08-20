@@ -1,22 +1,25 @@
 package communication
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 //Outbound message senders
-func (client *Client) RegisterPlayer(name string, color string) {
-	registrationMessage := getPlayerRegistrationMessage(name, color)
+func (client *Client) RegisterPlayer(name string) {
+	registrationMessage := getPlayerRegistrationMessage(name)
 	jsonMessage, _ := json.Marshal(&registrationMessage)
 	client.WriteMessage(jsonMessage)
 }
 
-func (client *Client) StartGame(playerId string) {
-	startGameMessage := getStartGameMessage(playerId)
+func (client *Client) StartGame() {
+	startGameMessage := getStartGameMessage()
 	jsonMessage, _ := json.Marshal(&startGameMessage)
 	client.WriteMessage(jsonMessage)
 }
 
-func (client *Client) RegisterMove(direction string, playerId string) {
-	registerMoveMessage := getRegisterMoveMessage(direction, playerId)
+func (client *Client) RegisterMove(direction string) {
+	registerMoveMessage := getRegisterMoveMessage(direction)
 	jsonMessage, _ := json.Marshal(&registerMoveMessage)
 	client.WriteMessage(jsonMessage)
 }
@@ -37,6 +40,8 @@ func ParseGameMessage(msg []byte) gameMessage {
 func ParsePlayerRegisteredMessage(msg []byte) PlayerRegisteredMessage {
 	var parsed PlayerRegisteredMessage
 	json.Unmarshal(msg, &parsed)
+
+	fmt.Println("parsed player registration")
 	return parsed
 }
 
@@ -71,29 +76,28 @@ func ParseGameStartingMessage(msg []byte) GameStartingMessage {
 }
 
 //Outbound messages
-func getRegisterMoveMessage(direction string, playerId string) registerMoveMessage {
+func getRegisterMoveMessage(direction string) registerMoveMessage {
 	return registerMoveMessage{
-		gameMessage: gameMessage{Type: RegisterMove, ReceivingPlayerId: playerId},
+		gameMessage: gameMessage{Type: RegisterMove},
 		Direction:   direction}
 }
 
-func getStartGameMessage(playerId string) startGameMessage {
-	return startGameMessage{gameMessage{Type: StartGame, ReceivingPlayerId: playerId}}
+func getStartGameMessage() startGameMessage {
+	return startGameMessage{gameMessage{Type: StartGame}}
 }
 
-func getPlayerRegistrationMessage(name string, color string) playerRegistrationMessage {
+func getPlayerRegistrationMessage(name string) playerRegistrationMessage {
 	return playerRegistrationMessage{
 		gameMessage:  gameMessage{Type: RegisterPlayerMessageType},
 		PlayerName:   name,
-		Color:        color,
 		GameSettings: getGameSettings(),
 	}
 }
 
 func getGameSettings() gameSettings {
 	return gameSettings{
-		Width:                    10,
-		Height:                   10,
+		Width:                    small,
+		Height:                   small,
 		MaxNoofPlayers:           5,
 		StartSnakeLength:         1,
 		TimeInMsPerTick:          250,

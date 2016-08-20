@@ -76,7 +76,7 @@ func reader(client Client) {
 			}
 			return
 		default:
-			_, message, err := client.socketConnection.ReadMessage()
+			_, msg, err := client.socketConnection.ReadMessage()
 
 			if err != nil {
 				log.Fatal("Error while Reading ", err)
@@ -85,8 +85,8 @@ func reader(client Client) {
 				}
 			}
 
-			//	fmt.Printf("got message: %s\n", string(message))
-			client.ReadChannel <- message
+			//		fmt.Printf("got message: %s\n", string(msg))
+			client.ReadChannel <- msg
 		}
 	}
 }
@@ -99,6 +99,7 @@ func writer(client Client) {
 				continue
 			}
 
+			//		fmt.Printf("writing message: %s\n", string(msg))
 			err := client.socketConnection.WriteMessage(websocket.TextMessage, msg)
 
 			if err != nil {

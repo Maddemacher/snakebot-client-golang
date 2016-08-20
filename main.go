@@ -12,10 +12,12 @@ const port int = 80
 const mode string = "training"
 
 func main() {
+	fmt.Println("main start")
 	c := communication.NewClient(hostName, port, mode)
 	defer c.Close()
 
-	s := snake.NewSnake("golangsnake", "black", c)
+	s := snake.NewSnake("golangsnake", c)
+	fmt.Println("initiating snake")
 	s.Init()
 
 	var message string

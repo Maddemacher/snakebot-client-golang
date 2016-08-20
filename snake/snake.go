@@ -16,8 +16,8 @@ type snake struct {
 	IsPlaying     bool
 }
 
-func NewSnake(name string, color string, Client communication.Client) snake {
-	s := snake{color: color, name: name, Client: Client, IsPlaying: false}
+func NewSnake(name string, Client communication.Client) snake {
+	s := snake{name: name, Client: Client, IsPlaying: false}
 	s.FinishChannel = make(chan string)
 	return s
 }
@@ -25,7 +25,7 @@ func NewSnake(name string, color string, Client communication.Client) snake {
 func (s *snake) Init() {
 	go eventLoop(*s)
 
-	s.Client.RegisterPlayer(s.name, s.color)
+	s.Client.RegisterPlayer(s.name)
 }
 
 func eventLoop(s snake) {
@@ -54,17 +54,16 @@ func eventLoop(s snake) {
 }
 
 func (s *snake) onPlayerRegistered(registrationMessage communication.PlayerRegisteredMessage) {
-	s.playerId = registrationMessage.ReceivingPlayerId
-	if registrationMessage.GameMode == "training" {
-		s.Client.StartGame(s.playerId)
+	if registrationMessage.GameMode == "TRAINING" {
+		s.Client.StartGame()
 	}
 }
 
 func (s *snake) onMapUpdated(mapUpdatedMessage communication.MapUpdatedMessage) {
-	printer.PrintMap(mapUpdatedMessage.Map, s.playerId)
+	printer.PrintMap(mapUpdatedMessage.Map)
 
 	//Do (hopefully) smart stuff
-	s.Client.RegisterMove("UP", s.playerId)
+	s.Client.RegisterMove("UP")
 }
 
 func (s *snake) onInvalidPlayerName(invalidPlayerNameMessage communication.InvalidPlayerNameMessage) {
@@ -85,6 +84,6 @@ func (s *snake) onSnakeDead(snakeDeadMessage communication.SnakeDeadMessage) {
 }
 
 func (s *snake) onGameEnded(gameEndedMessage communication.GameEndedMessage) {
-	printer.PrintMap(gameEndedMessage.Map, s.playerId)
+	printer.PrintMap(gameEndedMessage.Map)
 	s.FinishChannel <- "Game Ended"
 }

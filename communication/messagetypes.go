@@ -1,5 +1,9 @@
 package communication
 
+import (
+	"../common"
+)
+
 //inbound messages
 const GameEnded string = "se.cygni.snake.api.event.GameEndedEvent"
 const MapUpdated string = "se.cygni.snake.api.event.MapUpdateEvent"
@@ -12,6 +16,12 @@ const InvalidPlayerName string = "se.cygni.snake.api.exception.InvalidPlayerName
 const RegisterPlayerMessageType string = "se.cygni.snake.api.request.RegisterPlayer"
 const StartGame string = "se.cygni.snake.api.request.StartGame"
 const RegisterMove string = "se.cygni.snake.api.request.RegisterMove"
+
+const (
+	small  = iota
+	medium = iota
+	large  = iota
+)
 
 //Outbound messages
 type gameSettings struct {
@@ -32,44 +42,54 @@ type gameSettings struct {
 }
 
 type gameMessage struct {
-	ReceivingPlayerId string `json:"receivingPlayerId"`
-	Type              string `json:"type"`
+	Type string `json:"type"`
 }
 
 type playerRegistrationMessage struct {
 	gameMessage
 	PlayerName   string       `json:"playerName"`
-	Color        string       `json:"color"`
 	GameSettings gameSettings `json:"gameSettings"`
 }
 
 type registerMoveMessage struct {
 	gameMessage
 	Direction string `json:"direction"`
+	GameId    string `json:"gameId"`
+	GameTick  int    `json:"gameTick"`
 }
 
 type startGameMessage struct {
 	gameMessage
 }
 
+type pingMessage struct {
+	gameMessage
+}
+
+type ClientInfoMessage struct {
+	gameMessage
+	Language      string `json:"language"`
+	OS            string `json:"operatingSystem"`
+	Ip            string `json:"ipAddress"`
+	ClientVersion string `json:"clientVersion"`
+}
+
 //Inbound messages
 type PlayerRegisteredMessage struct {
 	gameMessage
-	Name         string       `json:"name"`
-	Color        string       `json:"color"`
-	GameId       string       `json:"gameId"`
-	GameSettings gameSettings `json:"gameSettings"`
-	GameMode     string       `json:"gameMode"`
+	Name             string       `json:"name"`
+	GameId           string       `json:"gameId"`
+	GameSettings     gameSettings `json:"gameSettings"`
+	GameMode         string       `json:"gameMode"`
+	RecivingPlayerId string       `json:"RecivingPlayerId"`
 }
 
 type MapUpdatedMessage struct {
-	Map      Map `json:"map"`
-	GameTick int `json:"gameTick"`
-}
-
-type InvalidPlayerNameMessage struct {
 	gameMessage
-	ReasonCode int `json:"reasonCode"`
+	GameTick         int    `json:"gameTick"`
+	GameId           string `json:"gameId"`
+	Map              Map    `json:"map"`
+	RecivingPlayerId string `json:"receivingPlayerId"`
 }
 
 type GameEndedMessage struct {
@@ -97,13 +117,24 @@ type GameStartingMessage struct {
 	Height      int `json:"height"`
 }
 
-type Map struct {
-	Width  int      `json:"width"`
-	Height int      `json:"height"`
-	Map    [][]Tile `json:"tiles"`
+type InvalidPlayerNameMessage struct {
+	gameMessage
+	ReasonCode int `json:"reasonCode"`
 }
 
-type Tile struct {
-	Content  string `json:"content"`
-	PlayerId string `json:"PlayerId"`
+type Map struct {
+	Width             int              `json:"width"`
+	Height            int              `json:"height"`
+	WorldTick         int              `json:"worldTick"`
+	SnakeInfos        []SnakeInfo      `json:"snakeInfos"`
+	FoodPositions     common.Positions `json:"foodPositions"`
+	ObstaclePositions common.Positions `json:"obstaclePositions"`
+}
+
+type SnakeInfo struct {
+	Name                      string           `json:"name"`
+	Points                    int              `json:"points"`
+	Positions                 common.Positions `json:"positions"`
+	TailProtectedForGameTicks int              `json:"tailProtectedForGameTicks"`
+	Id                        common.Id        `json:"id"`
 }
